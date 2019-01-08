@@ -35,12 +35,13 @@
         </li>
       </ul>
     </div>
-
+    <shopcart ref="shopcart"  :delivery-price="seller.deliveryPrice" :min-price="seller.minPrice"></shopcart>
   </div>
 </template>
 
 <script type="text/ecmascript-6">
 import BScroll from 'better-scroll';
+import shopcart from '../../components/shopcart/shopcart';
 const ERR_OK = 0;
 export default {
   props: {
@@ -66,6 +67,17 @@ export default {
         }
       }
       return 0;
+    },
+    selectFoods() {
+      let foods = [];
+      this.goods.forEach((good) => {
+        good.foods.forEach((food) => {
+          if (food.count) {
+            foods.push(food);
+          }
+        });
+      });
+      return foods;
     }
   },
   created() {
@@ -112,6 +124,9 @@ export default {
         this.listHeight.push(height);
       }
     }
+  },
+  components: {
+    shopcart
   }
 };
 </script>
