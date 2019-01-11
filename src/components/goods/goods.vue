@@ -30,7 +30,7 @@
                   <span class="now">￥{{food.price}}</span><span class="old" v-show="food.oldPrice">￥{{food.oldPrice}}</span>
                 </div>
                 <div class="cartcontrol-wrapper">
-                  <cartcontrol :food="food"></cartcontrol>
+                  <cartcontrol :food="food" @cart-add="cartAdd"></cartcontrol>
                 </div>
               </div>
             </li>
@@ -127,6 +127,11 @@ export default {
         height += item.clientHeight;
         this.listHeight.push(height);
       }
+    },
+    cartAdd(el) { 
+      this.$nextTick(() => {
+        this.$refs.shopcart.drop(el);
+      });
     }
   },
   components: {

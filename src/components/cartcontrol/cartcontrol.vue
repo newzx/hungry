@@ -18,16 +18,21 @@ export default {
       type: Object
     }
   },
+  
   methods: {
     addCart(event) {     
       if (!event._constructed) {       
-        return;       
+        return;
+        // 非自定义的情况下return掉避免pc端检测掉两次点击事件   
       }
       if (!this.food.count) {
         Vue.set(this.food, 'count', 1);
+        // 给对象添加他不存在的属性时 需要用vue.set();
       } else {
         this.food.count++;
       }
+      this.$emit('cart-add', event.target);
+      // 添加一个商品时派发一个事件，将当前dom传递给goods.vue
     },
     decreaseCart(event) {
       if (!event._constructed) {

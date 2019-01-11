@@ -1,6 +1,6 @@
 <template>
   <div class="shopcart">
-    <div class="content">
+    <div class="content" @click="toggleList">
       <div class="content-left">
         <div class="logo-wrapper">
           <div class="logo"  :class="{'highlight':totalCount>0}">
@@ -14,11 +14,41 @@
       <div class="content-right">
         <div class="pay" :class="payClass">{{payDesc}}</div>
       </div>
+    </div>   
+    <div class="ball-container">
+      <div v-for="(ball, index) in balls" :key="index">
+        <transition name="drop" @before-enter="beforeEnter" @enter="enter" @after-enter="afterEnter">
+          <div  v-show="ball.show" class="ball">
+            <div class="inner inner-hook"></div>
+          </div>
+        </transition>
+      </div>     
     </div>
+    <!--购物车列表 -->
+    <div class="shopcart-list" v-show="listShow">
+      <div class="list-header">
+        <h1 class="title">购物车</h1>
+        <span class="empty">清空</span>
+      </div>
+      <div class="list-content">
+        <ul>
+          <li class="food" v-for="(food, index) in selectFoods" :key="index">
+            <span class="name">{{food.name}}</span>
+            <div class="price">
+              <span>￥{{food.price*food.count}}</span>
+            </div>
+            <div class="cartcontrol0wrapper">
+              <cartcontrol :food="food"></cartcontrol>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div> 
   </div>
 </template>
 
 <script type="text/ecmascript-6">
+import cartcontrol from '../../components/cartcontrol/cartcontrol';
 export default {
   props: {
     selectFoods: {
@@ -42,7 +72,27 @@ export default {
     }
   },
   data() {
-    return {};
+    return {
+      balls: [// 维护小球当前状态 初始隐藏
+        {
+          show: false
+        },
+        {
+          show: false
+        },
+        {
+          show: false
+        },
+        {
+          show: false
+        },
+        {
+          show: false
+        }
+      ],
+      dropBalls: [], // 增加一个变量  用来存储已经下落的小球
+      fold: true // 定义展开和收起的状态，列表默认折叠
+    };
   },
   computed: {
     totalPrice() {
@@ -75,9 +125,73 @@ export default {
       } else {
         return 'enough';
       }
+    },
+    listShow() {
+      if (!this.totalCount) {
+        this.fold = true;
+        return false;
+      }
+      let show = !this.fold;
+      return show;
+    }   
+  },
+  methods: {
+    drop(el) {
+      for (let i = 0; i < this.balls.length; i++) {
+        let ball = this.balls[i];
+        if (!ball.show) { // 拿到第一个show 为false 的球，做一个动画
+          ball.show = true;
+          ball.el = el; // 保留当前dom对象 用来计算位置 
+          this.dropBalls.push(ball);// 存储下落小球 后续做处理
+          return;
+        }
+      }     
+    },
+    toggleList() {
+      if (!this.totalCount) { // 购物车  无商品时  不可点击
+        return;
+      }
+      this.fold = !this.fold;
+    },
+    beforeEnter: function(el) {    
+      let count = this.balls.length;
+      while (count--) {
+        let ball = this.balls[count];
+        if (ball.show) {
+          let rect = ball.el.getBoundingClientRect();
+          let x = rect.left - 32;//  小球掉落x轴起点  
+          let y = -(window.innerHeight - rect.top - 22);// 小球掉落y轴起点  向下为负
+          el.style.display = '';
+          el.style.webkitTransform = `translate3d(0,${y}px,0)`;// 有变量的时候 用反引号
+          el.style.transform = `translate3d(0,${y}px,0)`;
+          let inner = el.getElementsByClassName('inner-hook')[0];
+          inner.style.webkitTransform = `translate3d(${x}px,0,0)`;
+          inner.style.transform = `translate3d(${x}px,0,0)`;
+        }
+      }
+    },
+    enter: function(el) {
+      /* eslint-disable no-unused-vars */
+      let rf = el.offsetHeight; // 触发重绘  关闭eslint检查也是因为这里 定义之后再未用到
+      this.$nextTick(() => {
+        el.style.webkitTransform = 'translate3d(0,0,0)';
+        el.style.transform = 'translate3d(0,0,0)';
+        let inner = el.getElementsByClassName('inner-hook')[0];
+        inner.style.webkitTransform = 'translate3d(0,0,0)';
+        inner.style.transform = 'translate3d(0,0,0)';
+      });
+    },
+    afterEnter: function(el) {
+      let ball = this.dropBalls.shift();// 把数组第一个值删除  并返回第一个值
+      if (ball) {
+        ball.show = false;
+        el.style.display = 'none';
+      }
     }
   },
-  components: {}
+  components: {
+    cartcontrol
+  }
 };
 </script>
 
@@ -168,4 +282,34 @@ export default {
         &.enough
           background #00b43c
           color #fff
+  .ball-container
+    .ball
+      position: fixed
+      left: 32px
+      bottom: 22px
+      z-index: 200
+      transition: all .4s cubic-bezier(.49, -.29, .75, .41)
+      .inner
+        width: 16px
+        height: 16px
+        border-radius: 50%
+        background: rgb(0, 160, 220)
+        transition: all .4s linear
+  .shopcart-list
+    position absolute
+    left 0
+    top 0
+    z-index -1
+    transform translate3d(0, -100%, 0) //整个列表相对自身做一个偏移
+    &.fade-enter-active,&.fade-leave-active
+      transition all 0.5s linear 
+      transform translate3d(0, -100%, 0)
+    &.fade-enter,&fade-leave-active
+      transform translate3d(0, 0, 0)
+    .list-header
+      height 40px
+      line-height 40px
+      padding 0 18px
+
+
 </style>
