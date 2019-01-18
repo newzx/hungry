@@ -390,7 +390,6 @@ export default {
           position absolute
           right 0
           bottom 6px
-
   .list-mask
     position fixed
     top 0
@@ -405,7 +404,6 @@ export default {
       transition all 0.3s
     &.mask-fade-enter, &.mask-fade-leave-to
       opacity 0
-
 
 
 </style>
