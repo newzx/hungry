@@ -19,13 +19,23 @@
             <span class="now">￥{{food.price}}</span><span v-show="food.oldPrice" class="old">￥{{food.oldPrice}}</span>
           </div>
           <div class="cartcontrol-wrapper">
-            <cartcontrol :food="food" @click="addFood($event)"></cartcontrol>
+            <cartcontrol @cart-add="addFood($event)" :food="food"></cartcontrol>
           </div>
           <transition name="fade">
             <div @click.stop.prevent="addFirst($event)" class="buy" v-show="!food.count || food.count===0">加入购物车</div>
-          </transition>         
+          </transition>                 
         </div>
-
+        <split v-show="food.info"></split>
+        <div class="info" v-show="food.info">
+          <h1 class="title">商品信息</h1>
+          <p class="text">{{food.info}}</p>
+        </div>
+        <split></split>
+        <!-- 有关评价 -->
+        <div class="rating">
+          <h1 class="title">商品评价</h1>
+          <ratingselect :select-type="selectType" :only-content="onlyContent" :desc="desc" :ratings="food.ratings"></ratingselect>
+        </div>
       </div>     
     </div>
   </transition> 
@@ -35,6 +45,10 @@
 import BScroll from 'better-scroll';
 import Vue from 'vue';
 import cartcontrol from '../../components/cartcontrol/cartcontrol';
+import split from '../../components/split/split';
+import ratingselect from '../../components/ratingselect/ratingselect';
+
+const ALL = 2;
 export default {
   props: {
     food: {
@@ -43,7 +57,14 @@ export default {
   },
   data() {
     return {
-      showFlag: false
+      showFlag: false,
+      selectType: ALL,
+      onlyContent: true,
+      desc: {
+        all: '全部',
+        positive: '推荐',
+        negative: '吐槽'
+      }
     };
   },
   methods: {
@@ -69,13 +90,14 @@ export default {
       this.$emit('cart-add', event.target); 
       Vue.set(this.food, 'count', 1);    
     },
-    addFood(event) {      
-      this.$emit('cart-add', event.target);
+    addFood(target) {      
+      this.$emit('cart-add', target);
     }
-
   },
   components: {
-    cartcontrol
+    cartcontrol,
+    split,
+    ratingselect
   }
 };
 </script>
@@ -167,6 +189,25 @@ export default {
           opacity 1
         &.fade-enter,&.fade-leave-active
           opacity 0
+    .info
+      padding 18px 
+      .title
+        line-height 14px
+        margin-bottom 16px 
+        font-size 14px 
+        color rgb(7, 17, 27)
+      .text
+        line-height 24px 
+        padding 0 8px 
+        font-size 12px 
+        color rgb(77, 85, 93)
+    .rating
+      padding-top 18px 
+      .title
+        line-height 14px
+        margin-left 18px
+        font-size 14px
+        color rgb(7, 17, 27)
 
 
    
