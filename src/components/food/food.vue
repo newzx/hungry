@@ -34,7 +34,23 @@
         <!-- 有关评价 -->
         <div class="rating">
           <h1 class="title">商品评价</h1>
-          <ratingselect :select-type="selectType" :only-content="onlyContent" :desc="desc" :ratings="food.ratings"></ratingselect>
+          <ratingselect @increment="incrementTotal" :select-type="selectType" :only-content="onlyContent" :desc="desc" :ratings="food.ratings"></ratingselect>
+          <div class="rating-wrapper">
+            <ul v-show="food.ratings && food.ratings.length">
+              <li v-show="needShow(rating.rateType,rating.text)" v-for="rating in food.ratings" :key="rating.id" class="rating-item border-1px">
+                <div class="user">
+                  <span class="name">{{rating.username}}</span>
+                  <img class="avatar" width="12" height="12" :src="rating.avatar">
+                </div>
+                <div class="time">{{rating.rateTime | formatDate}}</div>
+                <p class="text">
+                  <span :class="{'icon-thumb_up':rating.rateType===0,'icon-thunb_down':rating.rateType===1}"></span>{{rating.text}}
+                </p>
+              </li>
+            </ul>
+            <!-- 无评价 -->
+            <div class="no-rating" v-show="!food.ratings || !food.ratings.length">暂无评价</div>
+          </div>
         </div>
       </div>     
     </div>
@@ -44,6 +60,7 @@
 <script type="text/ecmascript-6">
 import BScroll from 'better-scroll';
 import Vue from 'vue';
+import {formatDate} from '../../common/js/date';
 import cartcontrol from '../../components/cartcontrol/cartcontrol';
 import split from '../../components/split/split';
 import ratingselect from '../../components/ratingselect/ratingselect';
@@ -92,8 +109,45 @@ export default {
     },
     addFood(target) {      
       this.$emit('cart-add', target);
+    },
+    incrementTotal(type, data) {
+      this[type] = data;
+      this.$nextTick(() => {
+        this.scroll.refresh();
+      });
+    },
+    needShow(type, text) {
+      if (this.onlyContent && !text) {
+        return false;
+      }
+      if (this.selectType === ALL) {
+        return true;
+      } else {
+        return type === this.selectType;
+      }
     }
   },
+  events: {
+    'ratingtype.select'(type) {
+      this.selectType = type;
+      this.$nextTick(() => {
+        this.scroll.refresh();
+      });
+    },
+    'content.toggle'(onlyContent) {
+      this.onlyContent = onlyContent;
+      this.$nextTick(() => {
+        this.scroll.refresh();
+      });
+    }
+  },
+  filters: {
+    formatDate(time) {
+        let date = new Date(time);
+        return formatDate(date, 'yyyy-MM-dd hh:mm');
+    }  
+  },
+  
   components: {
     cartcontrol,
     split,
@@ -208,6 +262,48 @@ export default {
         margin-left 18px
         font-size 14px
         color rgb(7, 17, 27)
+      .rating-wrapper
+        padding 0 18px
+        .rating-item
+          positive  relative 
+          padding 16px 0
+          border-1px(rgba(7, 17, 27, 0.1))
+          .user
+            positive absolute 
+            right 0
+            top 16px 
+            line-height 12px 
+            font-size 0
+            .name
+              display inline-block
+              margin-right 6px
+              vertical-align top
+              font-size 10px
+              color rgb(147, 153, 159)
+            .avatar
+              border-radius 50%
+          .time
+            margin-bottom 6px
+            line-height 12px
+            font-size 10px
+            color rgb(147, 153, 159)
+          .text
+            line-height: 16px
+            font-size 12px
+            color rgb(7, 17, 27)
+            .icon-thumb_up, .icon-thumb_down
+              margin-right 4px
+              line-height 16px
+              font-size 12px
+            .icon-thumb_up
+              color rgb(0, 160, 220)
+            .icon-thumb_down
+              color rgb(147, 153, 159)
+
+        .no-rating
+          padding 16px 0
+          font-size 12px
+          color rgb(147, 153, 159)
 
 
    
