@@ -68,7 +68,7 @@ export default {
         return;
       }
       this.sType = type;
-      this.$emit('increment', 'selectType', this.sType);
+      this.$emit('increment', 'selectType', this.sType);     
     },
     toggleContent(event) {
       if (!event._constructed) {

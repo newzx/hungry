@@ -303,8 +303,5 @@ export default {
         .no-rating
           padding 16px 0
           font-size 12px
-          color rgb(147, 153, 159)
-
-
-   
+          color rgb(147, 153, 159)  
 </style> 
