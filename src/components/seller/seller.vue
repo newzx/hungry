@@ -69,6 +69,7 @@
 
 <script type="text/ecmascript-6">
 import BScroll from 'better-scroll';
+import {saveToLocal, loadFormLocal} from '../../common/js/store';
 import star from '../../components/star/star';
 import split from '../../components/split/split';
 export default {
@@ -79,7 +80,11 @@ export default {
   },
   data() {
     return {
-      favorite: true
+      // favorite: true
+      favorite: (() => {
+        // 默认没有被收藏，从localstorge中读取
+        return loadFormLocal(this.seller.id, 'favorite', false);
+      })()
     };
   },
   computed: {
@@ -133,6 +138,7 @@ export default {
         return;
       }
       this.favorite = !this.favorite;
+      saveToLocal(this.seller.id, 'favorite', this.favorite);
     }
   },
   components: {
